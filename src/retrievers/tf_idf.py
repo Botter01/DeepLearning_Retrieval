@@ -2,6 +2,7 @@ from src.data_utils.document import Document
 from src.retrievers.base_retriever import Retriever
 import numpy as np
 from scipy.sparse import lil_matrix
+import re
 
 
 class TFIDF(Retriever):
@@ -18,19 +19,27 @@ class TFIDF(Retriever):
         """
         Remove unwanted charatcters from text and lowercase
         """
-        raise NotImplementedError()
+        #raise NotImplementedError()
+        lowercase_text = text.lower()
+        lowercase_text = re.sub(r'[^a-zA-Z0-9 ]', "", lowercase_text)
+        split_text = lowercase_text.split()
+        return split_text
         
     def GetQueryVocabulary(self, query: str) -> list[str]:
         """
         Returns all unique words in a query
         """
-        raise NotImplementedError()
+        #raise NotImplementedError()
+        unique_words_query = list(set(self.PreprocessText(query)))
+        return unique_words_query
 
     def GetDocumentVocabulary(self, document: Document) -> list[str]:
         """
         Returns all unique words in a document
         """
-        raise NotImplementedError()
+        #raise NotImplementedError()
+        unique_words_document = list(set(self.PreprocessText(document.GetText())))
+        return unique_words_document
     
     def GetCorpusVocabulary(self) -> set[str]:
         """
