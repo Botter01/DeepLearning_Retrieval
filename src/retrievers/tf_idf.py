@@ -114,6 +114,7 @@ class TFIDF(Retriever):
             for idx_term, term in enumerate(terms):
                 document_term_frequencies = self.GetDocumentTermCounts(doc)
                 document_idfs = self.GetInverseDocumentFrequencies()
+                print(document_term_frequencies)
                 tf = (document_term_frequencies[term]/next(iter(document_term_frequencies)))
                 tfidf_matrix[idx_doc, idx_term] = tf*document_idfs[term]
         
