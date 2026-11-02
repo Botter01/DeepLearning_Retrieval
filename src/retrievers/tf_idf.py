@@ -21,7 +21,7 @@ class TFIDF(Retriever):
         """
         #raise NotImplementedError()
         lowercase_text = text.lower()
-        lowercase_text = re.sub(r'[^a-zA-Z0-9 ]', "", lowercase_text)
+        lowercase_text = re.sub(r'[^a-z0-9 ]', "", lowercase_text)
         split_text = lowercase_text.split()
         return split_text
         
