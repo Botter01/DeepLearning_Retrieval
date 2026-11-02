@@ -1,3 +1,5 @@
+from tqdm import tqdm
+
 from src.data_utils.document import Document
 from src.retrievers.base_retriever import Retriever
 import numpy as np
@@ -56,7 +58,7 @@ class TFIDF(Retriever):
         Returns a dict with terms and counts of how many documents the term occurs in (counted once per document).
         """
         #raise NotImplementedError()
-        documents_list = self.index.GetDocuments()
+        '''documents_list = self.index.GetDocuments()
         huge_word_list = []
         for document in documents_list:
             document_words = self.GetDocumentVocabulary(document)
@@ -65,6 +67,11 @@ class TFIDF(Retriever):
         counter = Counter(huge_word_list)
         most_common = counter.most_common()
         document_frequencies = dict(most_common)
+        '''
+        document_frequencies = Counter()
+        for document in self.index.GetDocuments():
+            document_frequencies.update(self.GetDocumentVocabulary(document))
+
         return document_frequencies
 
        
@@ -88,11 +95,14 @@ class TFIDF(Retriever):
         Returns a dict on the form {term: num_occurences} for an input Document.
         """
         #raise NotImplementedError()
+        '''
         document_words = self.PreprocessText(document.GetText())
-
         counter = Counter(document_words)
         most_common = counter.most_common()
-        document_term_frequencies = dict(most_common)
+        document_term_frequencies = dict(most_common)'''
+        words = self.PreprocessText(document.GetText())
+        document_term_frequencies = dict(Counter(words))
+
         return document_term_frequencies
 
 
@@ -109,13 +119,17 @@ class TFIDF(Retriever):
         tfidf_matrix = lil_matrix((n_documents, n_terms), dtype=np.float32)
         documents = self.index.GetDocuments()
         terms = self.corpus_vocabulary
+        document_idfs = self.GetInverseDocumentFrequencies()
         # TODO: Add tf-idf code
-        for idx_doc, doc in enumerate(documents):
-            for idx_term, term in enumerate(terms):
-                document_term_frequencies = self.GetDocumentTermCounts(doc)
-                document_idfs = self.GetInverseDocumentFrequencies()
-                print(document_term_frequencies)
-                tf = (document_term_frequencies[term]/next(iter(document_term_frequencies)))
+        for idx_doc, doc in enumerate(tqdm(documents, desc="Computing TF-IDF vectors")):
+            document_term_frequencies = self.GetDocumentTermCounts(doc)
+            if not document_term_frequencies:
+                continue
+            max_freq = max(document_term_frequencies.values())
+            for term, term_count in document_term_frequencies.items():
+                idx_term =self.term_to_index.get(term)
+                #print(document_term_frequencies)
+                tf = (term_count/max_freq)
                 tfidf_matrix[idx_doc, idx_term] = tf*document_idfs[term]
         
         return tfidf_matrix.tocsr()   # Convert to CSR format for efficient row slicing
