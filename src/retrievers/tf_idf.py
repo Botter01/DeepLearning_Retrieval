@@ -123,15 +123,16 @@ class TFIDF(Retriever):
         # TODO: Add tf-idf code
         for idx_doc, doc in enumerate(tqdm(documents, desc="Computing TF-IDF vectors")):
             document_term_frequencies = self.GetDocumentTermCounts(doc)
-            print(f"document_term_frequencies:{document_term_frequencies} ")
+            #print(f"document_term_frequencies:{document_term_frequencies} ")
             if not document_term_frequencies:
-                print("!!!!!!!!!!!!!!!!!!!!here is the document",doc.GetText())
+                #print("!!!!!!!!!!!!!!!!!!!!here is the document",doc.GetText())
+                continue
 
 
             #   continue
             max_freq = max(document_term_frequencies.values())
             for term, term_count in document_term_frequencies.items():
-                idx_term =self.term_to_index.get(term)
+                idx_term =self.term_to_index[term]
                 #print(document_term_frequencies)
                 tf = (term_count/max_freq)
                 tfidf_matrix[idx_doc, idx_term] = tf*document_idfs[term]
