@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from math import sqrt
+from attention import *
+import numpy as np
 
 class TransformerEncoder(nn.Module):
     def __init__(self, n_layers: int, n_heads: int, emb_dim: int, hidden_dim: int, feed_forward_dim: int):
@@ -16,8 +18,11 @@ class TransformerEncoder(nn.Module):
         """
         Instantiate the model.
         """
-        self.model = None
-        raise NotImplementedError()
+        self.model = nn.Sequential(
+            PositionalEncoding(self.emb_dim, dropout=0.1), *[EncoderLayer(self.emb_dim, self.n_heads, self.feed_forward_dim, dropout_rate=0.1) for _ in range(self.n_layers)]
+
+        )
+        #raise NotImplementedError()
 
     def pool(self, x):
         """
@@ -25,16 +30,18 @@ class TransformerEncoder(nn.Module):
         Returns: A pooled vector of shape batch_size x emb_dim
         """
         if self.cfg.model.pooling_type == 'cls':
-            raise NotImplementedError()
+            return x[:,0,:]
         
         elif self.cfg.model.pooling_type == 'max':
-            raise NotImplementedError()
+            return torch.max(x, dim=1).values
         
         elif self.cfg.model.pooling_type == 'mean':
-            raise NotImplementedError()
+            return torch.mean(x, dim=1)
 
     def forward(self, x: torch.tensor) -> torch.tensor:
         """
         Run a forward pass on the model
         """
-        raise NotImplementedError()
+
+        x = self.model(x)
+        return self.pool(x)
