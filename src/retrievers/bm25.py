@@ -9,6 +9,10 @@ class BM25(TFIDF):
         super(BM25, self).__init__(documents, index_path)
         self.k1 = k1
         self.b = b
+
+        if type(self) == BM25:
+            self.bm25_matrix = self.GetDocumentsBM25Vectors()
+
     
     def GetDocumentLengths(self):
         document_lengths = {}
@@ -34,7 +38,7 @@ class BM25(TFIDF):
 
         return inverse_document_frequencies
 
-    def GetDocumentsTFIDFVectors(self):
+    def GetDocumentsBM25Vectors(self):
         """
         Returns a n_documents x n_terms matrix whose element (i, j) is the td-idf score of the j'th term in the i'th document.
         """
@@ -44,14 +48,14 @@ class BM25(TFIDF):
         # Initialize a sparse matrix
         n_documents = len(self.index.GetDocuments())
         n_terms = len(self.corpus_vocabulary)
-        tfidf_matrix = lil_matrix((n_documents, n_terms), dtype=np.float32)
+        bm25_matrix = lil_matrix((n_documents, n_terms), dtype=np.float32)
         documents = self.index.GetDocuments()
         document_idfs = self.GetInverseDocumentFrequencies()
 
         document_lengths, average_document_length =self.GetDocumentLengths()
 
         # TODO: Add tf-idf code
-        for idx_doc, doc in enumerate(tqdm(documents, desc="Computing TF-IDF vectors")):
+        for idx_doc, doc in enumerate(tqdm(documents, desc="Computing BM25 vectors")):
             document_term_frequencies = self.GetDocumentTermCounts(doc)
             print(f"document_term_frequencies:{document_term_frequencies} ")
             if not document_term_frequencies:
@@ -63,12 +67,12 @@ class BM25(TFIDF):
             for term, term_count in document_term_frequencies.items():
                 idx_term =self.term_to_index[term]
                 #print(document_term_frequencies)
-                tf_numerator = term_count*(self.k +1)
-                tf_denumerator = term_count + self.k * (1 - self.b + self.b * (document_lengths/average_document_length))
+                tf_numerator = term_count*(self.k1 +1)
+                tf_denumerator = term_count + self.k1 * (1 - self.b + self.b * (document_lengths[doc]/average_document_length))
                 tf =tf_numerator /tf_denumerator
-                tfidf_matrix[idx_doc, idx_term] = tf*document_idfs[term]
+                bm25_matrix[idx_doc, idx_term] = tf*document_idfs[term]
 
-        return tfidf_matrix.tocsr()
+        return bm25_matrix.tocsr()
 
     
     def CalculateScores(self, queries: list[str]):
