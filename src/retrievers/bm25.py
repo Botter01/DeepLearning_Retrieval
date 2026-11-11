@@ -57,7 +57,7 @@ class BM25(TFIDF):
         # TODO: Add tf-idf code
         for idx_doc, doc in enumerate(tqdm(documents, desc="Computing BM25 vectors")):
             document_term_frequencies = self.GetDocumentTermCounts(doc)
-            print(f"document_term_frequencies:{document_term_frequencies} ")
+            #print(f"document_term_frequencies:{document_term_frequencies} ")
             if not document_term_frequencies:
                 continue
 
