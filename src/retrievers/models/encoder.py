@@ -31,13 +31,13 @@ class TransformerEncoder(nn.Module):
         Given a batch_size x sequence_length x emb_dim tensor, pool the input along the sequence_length dimension 
         Returns: A pooled vector of shape batch_size x emb_dim
         """
-        if self.model.pooling_type == 'cls':
+        if self.pooling_type == 'cls':
             return x[:,0,:]
         
-        elif self.model.pooling_type == 'max':
+        elif self.pooling_type == 'max':
             return torch.max(x, dim=1).values
         
-        elif self.model.pooling_type == 'mean':
+        elif self.pooling_type == 'mean':
             return torch.mean(x, dim=1)
 
     def forward(self, x: torch.tensor, mask: torch.tensor) -> torch.tensor:
