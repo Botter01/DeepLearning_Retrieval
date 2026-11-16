@@ -13,7 +13,10 @@ def make_train_loader(split, tokenizer, batch_size=32, max_length=128):
         query_ids, query_mask, document_ids, document_mask
     Row i of the queries matches row i of the documents.
     """
-    pairs = [(question, docs[0]) for question, docs in zip(split['question'], split['text'])]
+    pairs = []
+    for question, docs in zip(split['question'], split['text']):
+        for doc in docs:
+            pairs.append((question, doc))
 
     def collate(batch):
         queries, documents = zip(*batch)
