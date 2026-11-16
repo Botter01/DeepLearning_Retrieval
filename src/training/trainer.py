@@ -7,4 +7,8 @@ class Trainer:
         self.criterion = DPRLoss()
 
     def train(query_encoder: nn.Module, document_encoder: nn.Module):
-        raise NotImplementedError()
+        #raise NotImplementedError()
+        epochs = 100
+        batch_size = 8
+        optimizer = torch.optim.AdamW(query_encoder.parameters())
+

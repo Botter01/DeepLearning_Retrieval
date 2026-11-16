@@ -19,7 +19,8 @@ class TransformerEncoder(nn.Module):
         Instantiate the model.
         """
         self.model = nn.Sequential(
-            PositionalEncoding(self.emb_dim, dropout=0.1), *[EncoderLayer(self.emb_dim, self.n_heads, self.feed_forward_dim, dropout_rate=0.1) for _ in range(self.n_layers)]
+            PositionalEncoding(self.emb_dim, dropout=0.1), 
+            *[EncoderLayer(self.emb_dim, self.n_heads, self.feed_forward_dim, dropout_rate=0.1) for _ in range(self.n_layers)]
 
         )
         #raise NotImplementedError()

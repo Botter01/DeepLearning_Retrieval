@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class DPRLoss(nn.Module):
@@ -15,4 +16,6 @@ class DPRLoss(nn.Module):
 
         Returns: A 1d torch tensor 
         """
-        raise NotImplementedError()
+        #raise NotImplementedError()
+        softmax = F.softmax(torch.linalg.vecdot(documents.T, queries))
+        return -torch.log(softmax)
