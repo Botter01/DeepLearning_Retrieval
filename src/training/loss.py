@@ -17,5 +17,7 @@ class DPRLoss(nn.Module):
         Returns: A 1d torch tensor 
         """
         #raise NotImplementedError()
-        softmax = F.softmax(torch.linalg.vecdot(documents.T, queries))
-        return -torch.log(softmax)
+        numerator = torch.exp(torch.diagonal(queries @ documents.T))
+        denominator = torch.exp(queries @ documents.T).sum(dim=1)
+
+        return -torch.log(numerator / denominator)
