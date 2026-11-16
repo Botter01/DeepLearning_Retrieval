@@ -13,14 +13,11 @@ def make_train_loader(split, tokenizer, batch_size=32, max_length=128):
         query_ids, query_mask, document_ids, document_mask
     Row i of the queries matches row i of the documents.
     """
-    # raw text: one (query, relevant document) pair per query.
-    # In FiQA 'text' is a list of relevant documents -> take the first one
     pairs = [(question, docs[0]) for question, docs in zip(split['question'], split['text'])]
 
     def collate(batch):
         queries, documents = zip(*batch)
-        # raw text -> tensors. The tokenizer adds [CLS] ... [SEP], pads to the longest
-        # sentence in the batch and returns the attention mask (1 = real token, 0 = [PAD])
+
         q = tokenizer(list(queries), padding=True, truncation=True, max_length=max_length, return_tensors='pt')
         d = tokenizer(list(documents), padding=True, truncation=True, max_length=max_length, return_tensors='pt')
         return {'query_ids': q['input_ids'], 'query_mask': q['attention_mask'],
@@ -33,7 +30,7 @@ class Trainer:
     def __init__(self):
         self.criterion = DPRLoss()
 
-    def train(self, query_encoder: nn.Module, document_encoder: nn.Module, train_loader, epochs=20, lr=1e-4):
+    def train(self, query_encoder: nn.Module, document_encoder: nn.Module, train_loader, epochs=20, lr=0.0001):
         #raise NotImplementedError()
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         query_encoder.to(device)
@@ -49,8 +46,8 @@ class Trainer:
             for batch in train_loader:
                 batch = {k: v.to(device) for k, v in batch.items()}
 
-                query_emb = query_encoder(batch['query_ids'], batch['query_mask'])              # B x emb_dim
-                document_emb = document_encoder(batch['document_ids'], batch['document_mask'])  # B x emb_dim
+                query_emb = query_encoder(batch['query_ids'], batch['query_mask'])
+                document_emb = document_encoder(batch['document_ids'], batch['document_mask'])
 
                 loss = self.criterion(query_emb, document_emb).mean()
 

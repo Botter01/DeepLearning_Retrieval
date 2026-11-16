@@ -26,28 +26,30 @@ class TransformerEncoder(nn.Module):
         self.model = nn.ModuleList([EncoderLayer(self.emb_dim, self.n_heads, self.feed_forward_dim, dropout_rate=0.1) for _ in range(self.n_layers)])
         #raise NotImplementedError()
 
-    def pool(self, x):
+    def pool(self, x, mask):
         """
         Given a batch_size x sequence_length x emb_dim tensor, pool the input along the sequence_length dimension 
         Returns: A pooled vector of shape batch_size x emb_dim
         """
+        m = mask.unsqueeze(-1).to(x.dtype)
+
         if self.pooling_type == 'cls':
             return x[:,0,:]
         
         elif self.pooling_type == 'max':
-            return torch.max(x, dim=1).values
+            return x.masked_fill(m == 0, float('-inf')).max(dim=1).values
         
         elif self.pooling_type == 'mean':
-            return torch.mean(x, dim=1)
+            return (x * m).sum(dim=1) / m.sum(dim=1)
 
     def forward(self, x: torch.tensor, mask: torch.tensor) -> torch.tensor:
         """
         Run a forward pass on the model
         """
-        mask = mask.unsqueeze(1)
+        attn_mask = mask.unsqueeze(1)
 
         x = self.embedding(x)
         x = self.positional_enc(x)
         for layer in self.model:
-            x = layer(x, mask)
-        return self.pool(x)
+            x = layer(x, attn_mask)
+        return self.pool(x, mask)

@@ -83,8 +83,8 @@ class PositionwiseFeedForward(nn.Module):
 class EncoderLayer(nn.Module):
     def __init__(self, embed_dim, num_heads, ff_dim, dropout_rate):
         super().__init__()
-        self.self_attn = MultiHeadedAttention(num_heads, embed_dim)
-        self.feed_forward = PositionwiseFeedForward(embed_dim, ff_dim)
+        self.self_attn = MultiHeadedAttention(num_heads, embed_dim, dropout_rate)
+        self.feed_forward = PositionwiseFeedForward(embed_dim, ff_dim, dropout_rate)
         self.norm1 = nn.LayerNorm(embed_dim)
         self.norm2 = nn.LayerNorm(embed_dim)
         self.dropout = nn.Dropout(dropout_rate)
