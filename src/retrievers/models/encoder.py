@@ -40,11 +40,11 @@ class TransformerEncoder(nn.Module):
         elif self.model.pooling_type == 'mean':
             return torch.mean(x, dim=1)
 
-    def forward(self, x: torch.tensor) -> torch.tensor:
+    def forward(self, x: torch.tensor, mask: torch.tensor) -> torch.tensor:
         """
         Run a forward pass on the model
         """
-        mask = (x!= 0).unsqueeze(1)
+        mask = mask.unsqueeze(1)
 
         x = self.embedding(x)
         x = self.positional_enc(x)
