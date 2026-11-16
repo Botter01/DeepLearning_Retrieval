@@ -7,8 +7,8 @@ class DPR:
     
     def __load_models(self):
         # n_heads, n_layers, emb_in, hidden_dim, feed_forward_dim
-        query_encoder = TransformerEncoder(n_heads=4, n_layers=4, emb_dim=256, hidden_dim=256, feed_forward_dim=1024)
-        document_encoder = TransformerEncoder(n_heads=4, n_layers=4, emb_dim=256, hidden_dim=256, feed_forward_dim=1024)
+        query_encoder = TransformerEncoder(n_heads=4, n_layers=6, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=30000)
+        document_encoder = TransformerEncoder(n_heads=4, n_layers=6, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=30000)
         
         query_weights_path = self.cfg.model.get('query_encoder_weights_path', None)
         if self.cfg.model.get('query_encoder_weights_path', None):
