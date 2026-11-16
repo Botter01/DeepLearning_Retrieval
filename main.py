@@ -89,9 +89,9 @@ def main(cfg):
     tfidf_test_relevancies = retrieveQueryAndGetRelevancies(tf_idf, test_queries, k=cfg.top_k)
 
     ### Evaluate
-    train_scores = Evaluate(tfidf_train_relevancies, train_queries)
-    val_scores = Evaluate(tfidf_val_relevancies, val_queries)
-    test_scores = Evaluate(tfidf_test_relevancies, test_queries)
+    train_scores = Evaluate(tfidf_train_relevancies, train_queries, k=cfg.top_k)
+    val_scores = Evaluate(tfidf_val_relevancies, val_queries, k=cfg.top_k)
+    test_scores = Evaluate(tfidf_test_relevancies, test_queries, k=cfg.top_k)
 
     all_metrics = {"train": train_scores, "val": val_scores, "test": test_scores}
 

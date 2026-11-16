@@ -17,7 +17,7 @@ def calculateMRR(relevancies: list[bool], query: Query):
             break
     return rr
 
-def Evaluate(relevancies: list[list[bool]], queries: list[Query]):
+def Evaluate(relevancies: list[list[bool]], queries: list[Query], k: int):
     assert len(relevancies) == len(queries), 'The number of relevant passages must match the number of queries'
     scores = {'recall': None, 'recall_k': None, 'precision_k': None, 'mrr': None}
     n_queries = len(queries)
@@ -28,8 +28,8 @@ def Evaluate(relevancies: list[list[bool]], queries: list[Query]):
 
     for i in range(n_queries):
         total_recall += calculateRecall(relevancies[i], queries[i])
-        total_recall_k += calculateRecall_k(relevancies[i], queries[i], 6)
-        total_precision_k += calculatePrecision_k(relevancies[i], queries[i], 6)
+        total_recall_k += calculateRecall_k(relevancies[i], queries[i], k)
+        total_precision_k += calculatePrecision_k(relevancies[i], queries[i], k)
         total_mrr += calculateMRR(relevancies[i], queries[i])
     
     scores['recall'] = total_recall / n_queries
