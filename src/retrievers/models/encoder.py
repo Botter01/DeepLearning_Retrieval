@@ -23,10 +23,7 @@ class TransformerEncoder(nn.Module):
         """
         self.embedding = nn.Embedding(self.vocab_size, self.emb_dim)
         self.positional_enc = PositionalEncoding(self.emb_dim, dropout=0.1)
-        self.model = nn.ModuleList(
-            *[EncoderLayer(self.emb_dim, self.n_heads, self.feed_forward_dim, dropout_rate=0.1) for _ in range(self.n_layers)]
-
-        )
+        self.model = nn.ModuleList([EncoderLayer(self.emb_dim, self.n_heads, self.feed_forward_dim, dropout_rate=0.1) for _ in range(self.n_layers)])
         #raise NotImplementedError()
 
     def pool(self, x):
@@ -34,23 +31,23 @@ class TransformerEncoder(nn.Module):
         Given a batch_size x sequence_length x emb_dim tensor, pool the input along the sequence_length dimension 
         Returns: A pooled vector of shape batch_size x emb_dim
         """
-        if self.cfg.model.pooling_type == 'cls':
+        if self.model.pooling_type == 'cls':
             return x[:,0,:]
         
-        elif self.cfg.model.pooling_type == 'max':
+        elif self.model.pooling_type == 'max':
             return torch.max(x, dim=1).values
         
-        elif self.cfg.model.pooling_type == 'mean':
+        elif self.model.pooling_type == 'mean':
             return torch.mean(x, dim=1)
 
     def forward(self, x: torch.tensor) -> torch.tensor:
         """
         Run a forward pass on the model
         """
-        mask = (x!= 0).unsqueeze(0)
+        mask = (x!= 0).unsqueeze(1)
 
         x = self.embedding(x)
         x = self.positional_enc(x)
-        for layer in self.n_layers:
+        for layer in self.model:
             x = layer(x, mask)
         return self.pool(x)
