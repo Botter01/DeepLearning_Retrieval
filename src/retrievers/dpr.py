@@ -15,7 +15,7 @@ class DPR:
             query_encoder.load_state_dict(query_weights_path)
 
         document_weights_path = self.cfg.model.get('document_encoder_weights_path', None)
-        if self.cfg.model.get('query_encoder_weights_path', None):
+        if self.cfg.model.get('document_encoder_weights_path', None):
             document_encoder.load_state_dict(document_weights_path)
 
     
