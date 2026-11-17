@@ -5,21 +5,22 @@ from src.data_utils.corpus import Corpus
 from src.retrievers.models.encoder import TransformerEncoder
 from src.training.trainer import Trainer, make_train_loader
 
-batch_size = 32
-epochs = 2
+batch_size = 128
+epochs = 60
 save_dir = 'checkpoints'
 
 corpus = Corpus(dataset_name='fiqa', base_dir='./retrieval_data')
 
 tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 train_loader = make_train_loader(corpus.train, tokenizer, batch_size=batch_size)
+val_loader = make_train_loader(corpus.val, tokenizer, batch_size=batch_size)
 
-query_encoder = TransformerEncoder(n_layers=6, n_heads=4, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=tokenizer.vocab_size, pooling_type='cls')
-document_encoder = TransformerEncoder(n_layers=6, n_heads=4, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=tokenizer.vocab_size, pooling_type='cls')
+query_encoder = TransformerEncoder(n_layers=3, n_heads=4, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=tokenizer.vocab_size, pooling_type='mean')
+document_encoder = TransformerEncoder(n_layers=3, n_heads=4, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=tokenizer.vocab_size, pooling_type='mean')
 
 trainer = Trainer()
 
-query_encoder, document_encoder = trainer.train(query_encoder, document_encoder, train_loader, epochs=epochs)
+query_encoder, document_encoder = trainer.train(query_encoder, document_encoder, train_loader, val_loader, epochs=epochs)
 
 os.makedirs(save_dir, exist_ok=True)
 torch.save(query_encoder.state_dict(), f'{save_dir}/query_encoder.pt')

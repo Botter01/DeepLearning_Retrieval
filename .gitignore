@@ -226,3 +226,8 @@ __marimo__/
 
 retrieval_venv
 checkpoints
+*.err
+*.out
+*.sh
+*.pt
+*.yaml
