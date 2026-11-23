@@ -9,14 +9,21 @@ from src.evaluation.metrics import Evaluate
 
 
 class VectorDatabase:
+    """Exact cosine-similarity search (normalised inner product), same score DPRLoss trains on."""
 
     def __init__(self, embeddings: torch.Tensor, ids: list[str]):
         self.ids = ids
         self.index = faiss.IndexFlatIP(embeddings.shape[1])
-        self.index.add(embeddings.numpy().astype('float32'))
+        self.index.add(self._prep(embeddings))
+
+    @staticmethod
+    def _prep(x: torch.Tensor):
+        x = x.numpy().astype('float32')
+        faiss.normalize_L2(x)
+        return x
 
     def search(self, query_embeddings: torch.Tensor, k: int):
-        _, idx = self.index.search(query_embeddings.numpy().astype('float32'), k)
+        _, idx = self.index.search(self._prep(query_embeddings), k)
         return [[self.ids[j] for j in row] for row in idx]
 
 

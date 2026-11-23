@@ -9,6 +9,7 @@ from src.training.trainer import Trainer, make_train_loader, RetrievalEvaluator
 
 batch_size = 64
 epochs = 100
+lr = 3e-4  # from-scratch model: 1e-5 is a fine-tuning rate and barely moves the weights
 save_dir = 'checkpoints'
 
 corpus = Corpus(dataset_name='fiqa', base_dir='./retrieval_data')
@@ -28,7 +29,7 @@ evaluator = RetrievalEvaluator(doc_texts, doc_ids, val_queries, tokenizer, k=10)
 
 trainer = Trainer()
 
-query_encoder, document_encoder = trainer.train(query_encoder, document_encoder, train_loader, val_loader, evaluator, epochs=epochs)
+query_encoder, document_encoder = trainer.train(query_encoder, document_encoder, train_loader, val_loader, evaluator, epochs=epochs, lr=lr)
 
 os.makedirs(save_dir, exist_ok=True)
 torch.save(query_encoder.state_dict(), f'{save_dir}/query_encoder.pt')

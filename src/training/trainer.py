@@ -77,7 +77,13 @@ class Trainer:
             total += self.criterion(q, d).mean().item()
         return total / len(loader)
 
-    def train(self, query_encoder: nn.Module, document_encoder: nn.Module, train_loader, val_loader, evaluator: RetrievalEvaluator, epochs=20, lr=1e-5, warmup_ratio=0.05, monitor='mrr'):
+    def train(self, query_encoder: nn.Module, document_encoder: nn.Module, train_loader, val_loader, evaluator: RetrievalEvaluator, epochs=20, lr=3e-4, warmup_ratio=0.05, monitor='mrr',
+              patience=10, min_delta=1e-4, min_epochs=15):
+        """
+        Early stopping on evaluator metric `monitor` (higher is better). Patience only
+        starts counting once warmup is over AND `min_epochs` have run, so early noise in
+        the retrieval metric cannot stop training. The best checkpoint is tracked from epoch 1.
+        """
         #raise NotImplementedError()
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         query_encoder.to(device)
@@ -95,11 +101,11 @@ class Trainer:
             return 0.5 * (1 + math.cos(math.pi * progress))
 
         scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
+        warmup_epochs = math.ceil(warmup_steps / len(train_loader))
+        start_counting = max(warmup_epochs, min_epochs)
         best_val = float('-inf')
         best_state = None
         bad_epochs = 0
-        patience=5
-        min_delta=0.0001
 
         for epoch in range(epochs):
             query_encoder.train()
@@ -133,8 +139,9 @@ class Trainer:
                 bad_epochs = 0
                 best_state = (copy.deepcopy(query_encoder.state_dict()),
                                   copy.deepcopy(document_encoder.state_dict()))
-            else:
+            elif epoch + 1 > start_counting:
                 bad_epochs += 1
+                print(f'  no {monitor} improvement for {bad_epochs}/{patience} epochs (best {best_val:.4f})')
                 if bad_epochs >= patience:
                     print(f'Early stopping, best val {monitor}: {best_val:.4f}')
                     break
