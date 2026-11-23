@@ -18,8 +18,8 @@ tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 train_loader = make_train_loader(corpus.train, tokenizer, batch_size=batch_size)
 val_loader = make_train_loader(corpus.val, tokenizer, batch_size=batch_size)
 
-query_encoder = TransformerEncoder(n_layers=3, n_heads=4, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=tokenizer.vocab_size, pooling_type='mean')
-document_encoder = TransformerEncoder(n_layers=3, n_heads=4, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=tokenizer.vocab_size, pooling_type='mean')
+query_encoder = TransformerEncoder(n_layers=5, n_heads=2, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=tokenizer.vocab_size, pooling_type='mean')
+document_encoder = TransformerEncoder(n_layers=5, n_heads=2, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=tokenizer.vocab_size, pooling_type='mean')
 
 doc_texts, doc_ids = flatten_documents(corpus)
 val_queries = [Query(corpus.val['question'][i], id=corpus.val['query_id'][i],

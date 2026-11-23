@@ -78,7 +78,7 @@ class Trainer:
         return total / len(loader)
 
     def train(self, query_encoder: nn.Module, document_encoder: nn.Module, train_loader, val_loader, evaluator: RetrievalEvaluator, epochs=20, lr=3e-4, warmup_ratio=0.05, monitor='mrr',
-              patience=10, min_delta=1e-4, min_epochs=15):
+              patience=6, min_delta=1e-4, min_epochs=15):
         """
         Early stopping on evaluator metric `monitor` (higher is better). Patience only
         starts counting once warmup is over AND `min_epochs` have run, so early noise in
@@ -103,7 +103,7 @@ class Trainer:
         scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
         warmup_epochs = math.ceil(warmup_steps / len(train_loader))
         start_counting = max(warmup_epochs, min_epochs)
-        best_val = float('-inf')
+        best_val = float('inf')
         best_state = None
         bad_epochs = 0
 
@@ -132,9 +132,9 @@ class Trainer:
 
             metrics = evaluator(query_encoder, document_encoder, device)
             print('  ' + ' | '.join(f'{name} {value:.4f}' for name, value in metrics.items()))
-            score = metrics[monitor]
+            score = val_loss
 
-            if score > best_val + min_delta:
+            if score < best_val - min_delta:
                 best_val = score
                 bad_epochs = 0
                 best_state = (copy.deepcopy(query_encoder.state_dict()),

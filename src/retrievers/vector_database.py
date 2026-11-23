@@ -50,13 +50,13 @@ if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     save_dir = 'checkpoints'
     results_dir = 'results'
-    k = 10  
+    k = 6  
 
     corpus = Corpus(dataset_name='fiqa', base_dir='./retrieval_data')
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 
-    query_encoder = TransformerEncoder(n_layers=3, n_heads=4, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=tokenizer.vocab_size, pooling_type='mean')
-    document_encoder = TransformerEncoder(n_layers=3, n_heads=4, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=tokenizer.vocab_size, pooling_type='mean')
+    query_encoder = TransformerEncoder(n_layers=5, n_heads=2, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=tokenizer.vocab_size, pooling_type='mean')
+    document_encoder = TransformerEncoder(n_layers=5, n_heads=2, emb_dim=128, hidden_dim=32, feed_forward_dim=768, vocab_size=tokenizer.vocab_size, pooling_type='mean')
     query_encoder.load_state_dict(torch.load(f'{save_dir}/query_encoder.pt', map_location=device))
     document_encoder.load_state_dict(torch.load(f'{save_dir}/document_encoder.pt', map_location=device))
     query_encoder.to(device).eval()
@@ -82,5 +82,5 @@ if __name__ == '__main__':
         print(f'{name}: {scores}')
 
     os.makedirs(results_dir, exist_ok=True)
-    with open(f'{results_dir}/metrics_DENSE.json', 'w') as f:
+    with open(f'{results_dir}/metrics_DENSE_4.json', 'w') as f:
         json.dump(all_scores, f, indent=2)
