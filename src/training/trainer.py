@@ -77,7 +77,7 @@ class Trainer:
             total += self.criterion(q, d).mean().item()
         return total / len(loader)
 
-    def train(self, query_encoder: nn.Module, document_encoder: nn.Module, train_loader, val_loader, evaluator: RetrievalEvaluator, epochs=20, lr=1e-5, warmup_ratio=0.05, monitor='mrr'):
+    def train(self, query_encoder: nn.Module, document_encoder: nn.Module, train_loader, val_loader, evaluator: RetrievalEvaluator, epochs=20, lr=4e-4, warmup_ratio=0.05, monitor='mrr'):
         #raise NotImplementedError()
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         query_encoder.to(device)
@@ -95,10 +95,10 @@ class Trainer:
             return 0.5 * (1 + math.cos(math.pi * progress))
 
         scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
-        best_val = float('-inf')
+        best_val = float('inf')
         best_state = None
         bad_epochs = 0
-        patience=5
+        patience=10
         min_delta=0.0001
 
         for epoch in range(epochs):
@@ -126,9 +126,9 @@ class Trainer:
 
             metrics = evaluator(query_encoder, document_encoder, device)
             print('  ' + ' | '.join(f'{name} {value:.4f}' for name, value in metrics.items()))
-            score = metrics[monitor]
+            score = val_loss
 
-            if score > best_val + min_delta:
+            if score < best_val - min_delta:
                 best_val = score
                 bad_epochs = 0
                 best_state = (copy.deepcopy(query_encoder.state_dict()),
@@ -136,10 +136,10 @@ class Trainer:
             else:
                 bad_epochs += 1
                 if bad_epochs >= patience:
-                    print(f'Early stopping, best val {monitor}: {best_val:.4f}')
+                    print(f'Early stopping {epoch}, best val: {best_val:.4f}')
                     break
 
-        print(f'Best val {monitor}: {best_val:.4f}')
+        print(f'Best val {epoch}: {best_val:.4f}')
 
         if best_state is not None:
             query_encoder.load_state_dict(best_state[0])
