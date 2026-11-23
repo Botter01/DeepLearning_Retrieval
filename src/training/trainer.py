@@ -77,7 +77,7 @@ class Trainer:
             total += self.criterion(q, d).mean().item()
         return total / len(loader)
 
-    def train(self, query_encoder: nn.Module, document_encoder: nn.Module, train_loader, val_loader, evaluator: RetrievalEvaluator, epochs=20, lr=4e-4, warmup_ratio=0.05, monitor='mrr'):
+    def train(self, query_encoder: nn.Module, document_encoder: nn.Module, train_loader, val_loader, evaluator: RetrievalEvaluator, epochs=20, lr=1e-5, warmup_ratio=0.05, monitor='mrr'):
         #raise NotImplementedError()
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         query_encoder.to(device)

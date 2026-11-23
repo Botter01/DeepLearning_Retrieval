@@ -8,7 +8,7 @@ from src.retrievers.vector_database import flatten_documents
 from src.training.trainer import Trainer, make_train_loader, RetrievalEvaluator
 
 batch_size = 64
-epochs = 60
+epochs = 100
 save_dir = 'checkpoints'
 
 corpus = Corpus(dataset_name='fiqa', base_dir='./retrieval_data')
