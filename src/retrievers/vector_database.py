@@ -9,36 +9,33 @@ from src.evaluation.metrics import Evaluate
 
 
 class VectorDatabase:
-    """Exact cosine-similarity search (normalised inner product), same score DPRLoss trains on."""
-
-    def __init__(self, embeddings: torch.Tensor, ids: list[str]):
+    def __init__(self, embeddings, ids):
         self.ids = ids
         self.index = faiss.IndexFlatIP(embeddings.shape[1])
         self.index.add(self._prep(embeddings))
 
     @staticmethod
-    def _prep(x: torch.Tensor):
+    def _prep(x):
         x = x.numpy().astype('float32')
         faiss.normalize_L2(x)
         return x
 
-    def search(self, query_embeddings: torch.Tensor, k: int):
-        _, idx = self.index.search(self._prep(query_embeddings), k)
+    def search(self, query_embeddings, k):
+        doc, idx = self.index.search(self._prep(query_embeddings), k)
         return [[self.ids[j] for j in row] for row in idx]
 
 
 @torch.no_grad()
-def encode(texts: list[str], encoder, tokenizer, device, bs: int = 256, max_length: int = 512):
+def encode(texts, encoder, tokenizer, device, batch = 256, max_length = 512):
     out = []
-    for i in range(0, len(texts), bs):
-        t = tokenizer(texts[i:i + bs], padding=True, truncation=True,
+    for i in range(0, len(texts), batch):
+        t = tokenizer(texts[i:i + batch], padding=True, truncation=True,
                       max_length=max_length, return_tensors='pt').to(device)
         out.append(encoder(t['input_ids'], t['attention_mask']).cpu())
     return torch.cat(out)
 
 
-def flatten_documents(corpus: Corpus):
-
+def flatten_documents(corpus):
     texts, ids = [], []
     for row_texts, row_ids in zip(corpus.all_documents['text'], corpus.all_documents['document_id']):
         texts.extend(row_texts)

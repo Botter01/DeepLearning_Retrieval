@@ -23,10 +23,10 @@ def plot_attention(enc, text, name):
             ax = axes[l][h]
             ax.imshow(attn[h], cmap='viridis')
             ax.set_xticks(range(len(tokens)))
-            ax.set_xticklabels(tokens, rotation=90, fontsize=6)
+            ax.set_xticklabels(tokens, rotation=90)
             ax.set_yticks(range(len(tokens)))
-            ax.set_yticklabels(tokens, fontsize=6)
-            ax.set_title(f'layer {l} head {h}', fontsize=9)
+            ax.set_yticklabels(tokens)
+            ax.set_title(f'layer {l} head {h}')
     plt.tight_layout()
     plt.savefig(f'attn_{name}.png')
     plt.show()

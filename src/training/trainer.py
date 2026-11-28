@@ -10,8 +10,6 @@ from src.evaluation.metrics import Evaluate
 
 
 class QuestionDataset(Dataset):
-    """One item per question; each access samples one of its relevant answers as the positive."""
-
     def __init__(self, questions, answers):
         self.items = [(q, a) for q, a in zip(questions, answers) if len(a) > 0]
 
@@ -77,13 +75,8 @@ class Trainer:
             total += self.criterion(q, d).mean().item()
         return total / len(loader)
 
-    def train(self, query_encoder: nn.Module, document_encoder: nn.Module, train_loader, val_loader, evaluator: RetrievalEvaluator, epochs=20, lr=3e-4, warmup_ratio=0.05, monitor='mrr',
-              patience=6, min_delta=1e-4, min_epochs=15):
-        """
-        Early stopping on evaluator metric `monitor` (higher is better). Patience only
-        starts counting once warmup is over AND `min_epochs` have run, so early noise in
-        the retrieval metric cannot stop training. The best checkpoint is tracked from epoch 1.
-        """
+    def train(self, query_encoder, document_encoder, train_loader, val_loader, evaluator, epochs=20, lr=3e-4, warmup_ratio=0.05, monitor='mrr', patience=6, min_delta=1e-4, min_epochs=15):
+
         #raise NotImplementedError()
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         query_encoder.to(device)
@@ -101,10 +94,8 @@ class Trainer:
             return 0.5 * (1 + math.cos(math.pi * progress))
 
         scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
-        warmup_epochs = math.ceil(warmup_steps / len(train_loader))
-        start_counting = max(warmup_epochs, min_epochs)
+        start_counting = 5
         best_val = float('inf')
-        best_state = None
         bad_epochs = 0
 
         for epoch in range(epochs):
@@ -143,13 +134,9 @@ class Trainer:
                 bad_epochs += 1
                 print(f'  no {monitor} improvement for {bad_epochs}/{patience} epochs (best {best_val:.4f})')
                 if bad_epochs >= patience:
-                    print(f'Early stopping, best val {monitor}: {best_val:.4f}')
+                    print(f'Early stopping megállt, best val {monitor}: {best_val:.4f}')
                     break
 
         print(f'Best val {monitor}: {best_val:.4f}')
-
-        if best_state is not None:
-            query_encoder.load_state_dict(best_state[0])
-            document_encoder.load_state_dict(best_state[1])
 
         return query_encoder, document_encoder

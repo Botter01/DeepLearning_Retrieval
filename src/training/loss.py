@@ -12,12 +12,6 @@ class DPRLoss(nn.Module):
         @param queries: batch_size x embedding_dim
         @param documents: batch_size x embedding_dim
 
-        In-batch softmax over cosine similarities scaled by 1/temperature.
-        Embeddings are L2-normalised: with raw dot products the post-LayerNorm
-        vectors have norm ~sqrt(emb_dim), logits are huge at init, and the
-        cheapest way to lower the loss is to make every embedding identical
-        (loss -> ln(batch_size), i.e. chance level).
-
         Returns: A 1d torch tensor
         """
         queries = F.normalize(queries, dim=-1)

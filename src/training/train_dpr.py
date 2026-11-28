@@ -9,7 +9,7 @@ from src.training.trainer import Trainer, make_train_loader, RetrievalEvaluator
 
 batch_size = 64
 epochs = 100
-lr = 3e-4  # from-scratch model: 1e-5 is a fine-tuning rate and barely moves the weights
+lr = 3e-4 
 save_dir = 'checkpoints'
 
 corpus = Corpus(dataset_name='fiqa', base_dir='./retrieval_data')
