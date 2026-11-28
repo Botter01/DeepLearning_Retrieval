@@ -31,15 +31,15 @@ val_queries = make_queries(corpus.val)
 test_queries = make_queries(corpus.test)
 
 @torch.no_grad()
-def encode(texts, encoder, bs=256):
+def encode(texts, encoder, batch=256):
     out = []
-    for i in range(0, len(texts), bs):
-        t = tokenizer(texts[i:i+bs], padding=True, truncation=True,
+    for i in range(0, len(texts), batch):
+        t = tokenizer(texts[i:i+batch], padding=True, truncation=True,
                       max_length=128, return_tensors='pt').to(device)
         out.append(encoder(t['input_ids'], t['attention_mask']).cpu())
     return torch.cat(out)
 
-doc_ids = [d[0] for d in corpus.all_documents['document_id']]
+doc_ids = [doc[0] for doc in corpus.all_documents['document_id']]
 doc_texts = [' '.join(t) for t in corpus.all_documents['text']]
 
 doc_matrix = encode(doc_texts, document_encoder)

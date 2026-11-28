@@ -4,37 +4,29 @@ import torch.nn.functional as F
 import math
 
 class MultiHeadedAttention(nn.Module):
-    """A simple Multi-head attention layer."""
     def __init__(self, num_heads, embed_dim, dropout=0.1):
-        "Take in model size and number of heads."
         super(MultiHeadedAttention, self).__init__()
         assert embed_dim % num_heads == 0
-        # We assume d_v always equals d_k
         self.d_k = embed_dim // num_heads
         self.num_heads = num_heads
-        self.linears = nn.ModuleList([nn.Linear(embed_dim, embed_dim) for _ in range(4)])
-        self.attn = None # store the attention maps
+        self.linears = nn.ModuleList([nn.Linear(embed_dim, embed_dim) for i in range(4)])
+        self.attn = None
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, query, key, value, mask=None):
         nbatches = query.size(0)
         if mask is not None:
-            # Same mask applied to all h heads.
             mask = mask.unsqueeze(1)
 
-        # 1) Do all the linear projections in batch from d_model => h x d_k 
         query, key, value = [l(x).view(nbatches, -1, self.num_heads, self.d_k).transpose(1, 2) for l, x in zip(self.linears, (query, key, value))]
 
-        # 2) Apply attention on all the projected vectors in batch. 
         x, self.attn = attention(query, key, value, mask=mask, dropout=self.dropout)
 
-        # 3) "Concat" using a view and apply a final linear. 
         x = x.transpose(1, 2).contiguous().view(nbatches, -1, self.num_heads * self.d_k)
         return self.linears[-1](x)
 
 
 def attention(query, key, value, mask=None, dropout=None):
-    "Compute 'Scaled Dot Product Attention'"
     d_k = query.size(-1)
     scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
     if mask is not None:
@@ -46,12 +38,10 @@ def attention(query, key, value, mask=None, dropout=None):
 
 
 class PositionalEncoding(nn.Module):
-    "Implement the PE function."
     def __init__(self, emb_dim, dropout, max_len=5000):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
 
-        # Compute the positional encodings once in log space.
         pe = torch.zeros(max_len, emb_dim)
         position = torch.arange(0, max_len).unsqueeze(1)
         div_term = torch.exp(torch.arange(0, emb_dim, 2) * -(math.log(10000.0) / emb_dim))
@@ -72,8 +62,6 @@ class PositionwiseFeedForward(nn.Module):
             nn.ReLU(),
             nn.Dropout(dropout),
             nn.Linear(ff_dim, embed_dim)
-
-
         )
 
     def forward(self, x):
